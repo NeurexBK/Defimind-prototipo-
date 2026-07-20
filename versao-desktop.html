@@ -275,8 +275,68 @@
   .cta:active{transform:scale(.98)}
   .cta-note{text-align:center;font-size:12px;color:var(--ink-3);margin-top:8px}
 
+  /* --- funil: login / cadastro / perfil / criação da conta --- */
+  .auth{
+    position:absolute;inset:0;z-index:80;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;
+    transition:opacity .35s ease;
+  }
+  .auth.hide{opacity:0;pointer-events:none}
+  .ascreen{display:none;flex-direction:column;gap:14px;width:min(430px,calc(100% - 40px));padding:34px 8px;text-align:center;position:relative}
+  .ascreen.active{display:flex;animation:fadeUp .25s ease}
+  .a-logo{font-size:38px;font-weight:800;letter-spacing:-0.02em}
+  .a-logo i{font-style:normal;color:var(--green)}
+  .a-tag{font-size:15px;color:var(--ink-2);margin:0 0 8px}
+  .a-feats{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+  .a-feats span{font-size:12px;font-weight:700;background:var(--mint);color:var(--green-deep);border-radius:999px;padding:6px 12px}
+  .ascreen h2{font-size:22px;font-weight:800;letter-spacing:-0.01em;margin:0}
+  .a-sub{font-size:13.5px;color:var(--ink-2);margin:0}
+  .a-form{display:flex;flex-direction:column;gap:10px;text-align:left}
+  .a-form label{font-size:12.5px;font-weight:700;color:var(--ink-2);display:flex;flex-direction:column;gap:5px}
+  .a-form input[type=text],.a-form input[type=email],.a-form input[type=password]{
+    width:100%;border:1px solid var(--line);background:var(--card);border-radius:14px;
+    padding:13px 15px;font-size:14.5px;font-family:inherit;color:var(--ink);font-weight:500;
+  }
+  .a-check{flex-direction:row !important;align-items:center;gap:9px !important;font-weight:500 !important;font-size:12.5px !important}
+  .a-check input{width:17px;height:17px;accent-color:var(--green)}
+  .a-btn{display:block;width:100%;font-size:15px;font-weight:800;border-radius:15px;padding:14px;text-align:center;transition:transform .12s ease}
+  .a-btn:active{transform:scale(.98)}
+  .a-btn.primary{background:var(--green);color:#fff}
+  .a-btn.ghost{background:var(--card);border:1px solid var(--line);color:var(--ink)}
+  .a-link{font-size:13px;font-weight:700;color:var(--green-deep);margin-top:2px}
+  .a-note{font-size:11.5px;color:var(--ink-3);margin:6px 0 0}
+  .a-back{position:absolute;top:6px;left:2px;width:36px;height:36px;border-radius:999px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;font-size:16px;font-weight:700}
+  .a-progress{height:6px;background:var(--line);border-radius:999px;overflow:hidden}
+  .a-progress i{display:block;height:100%;background:var(--green);border-radius:999px;transition:width .25s ease}
+  .a-step{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin:0}
+  .a-opts{display:flex;flex-direction:column;gap:10px}
+  .a-opts button{
+    display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--line);
+    border-radius:16px;padding:15px 16px;font-size:14.5px;font-weight:700;text-align:left;color:var(--ink);
+    transition:transform .12s ease, border-color .12s ease;
+  }
+  .a-opts button:hover{border-color:var(--green)}
+  .a-opts button:active{transform:scale(.98)}
+  .a-opts .em{font-size:22px;flex:none}
+  .a-opts small{display:block;font-size:12px;font-weight:500;color:var(--ink-3)}
+  .a-spinner{width:46px;height:46px;border:4px solid var(--mint);border-top-color:var(--green);border-radius:999px;animation:spin 1s linear infinite;margin:0 auto 4px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion: reduce){.a-spinner{animation:none;border-top-color:var(--mint)}}
+  .a-checklist{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:10px;text-align:left}
+  .a-checklist li{
+    display:flex;align-items:center;gap:11px;font-size:14px;font-weight:600;color:var(--ink-3);
+    background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 15px;
+    transition:color .3s ease;
+  }
+  .a-checklist li::before{content:"○";font-size:16px;color:var(--line)}
+  .a-checklist li.done{color:var(--ink)}
+  .a-checklist li.done::before{content:"✓";color:var(--green);font-weight:800}
+  .a-powered{font-size:11.5px;color:var(--ink-3);margin:10px 0 0}
+  .a-powered b{color:var(--ink-2)}
+  .a-big{font-size:52px;line-height:1}
+
   .toast{
-    position:fixed;left:50%;bottom:34px;transform:translate(-50%,16px);z-index:70;
+    position:fixed;left:50%;bottom:34px;transform:translate(-50%,16px);z-index:90;
     background:var(--ink);color:#fff;font-size:13.5px;font-weight:600;
     padding:12px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;white-space:nowrap;
   }
@@ -293,6 +353,89 @@
     <div class="browser-bar"><i></i><i></i><i></i><span class="url">app.defimind.com</span></div>
 
     <div class="app">
+      <!-- ===== FUNIL: LOGIN / CADASTRO / PERFIL ===== -->
+      <div class="auth" id="auth">
+        <!-- Boas-vindas -->
+        <section class="ascreen active" id="a-welcome">
+          <div class="a-logo">DefiMind<i>.</i></div>
+          <p class="a-tag">Sua conta em dólar que rende todo dia — simples como deveria ser.</p>
+          <div class="a-feats">
+            <span>💵 Saldo em USDC</span><span>🐷 Caixinha rendendo</span><span>💳 Cartão com cashback</span>
+          </div>
+          <button class="a-btn primary" data-a="signup">Criar minha conta</button>
+          <button class="a-btn ghost" data-a="login">Já tenho conta</button>
+          <p class="a-note">Demonstração — nenhum dado real é enviado.</p>
+        </section>
+
+        <!-- Login -->
+        <section class="ascreen" id="a-login">
+          <button class="a-back" data-a="welcome" aria-label="Voltar">←</button>
+          <h2>Que bom te ver de novo 👋</h2>
+          <p class="a-sub">Entre para ver seu dinheiro rendendo.</p>
+          <form class="a-form" id="loginForm">
+            <label>E-mail
+              <input type="email" id="loginEmail" placeholder="voce@email.com" autocomplete="off">
+            </label>
+            <label>Senha
+              <input type="password" id="loginPass" placeholder="••••••••" autocomplete="off">
+            </label>
+            <button class="a-btn primary" type="submit">Entrar</button>
+          </form>
+          <button class="a-link" data-toast="No app real: recuperação por e-mail em 1 minuto 🙂">Esqueci minha senha</button>
+          <p class="a-note">Demo: qualquer e-mail e senha funcionam.</p>
+        </section>
+
+        <!-- Cadastro -->
+        <section class="ascreen" id="a-signup">
+          <button class="a-back" data-a="welcome" aria-label="Voltar">←</button>
+          <h2>Criar sua conta</h2>
+          <p class="a-sub">Leva menos de um minuto. Sem papelada.</p>
+          <form class="a-form" id="signupForm">
+            <label>Seu nome
+              <input type="text" id="suName" placeholder="Como podemos te chamar?" autocomplete="off">
+            </label>
+            <label>E-mail
+              <input type="email" id="suEmail" placeholder="voce@email.com" autocomplete="off">
+            </label>
+            <label>Senha
+              <input type="password" id="suPass" placeholder="Pelo menos 8 caracteres" autocomplete="off">
+            </label>
+            <label class="a-check">
+              <input type="checkbox" id="suTerms"> Li e aceito os termos e a política de privacidade
+            </label>
+            <button class="a-btn primary" type="submit">Continuar</button>
+          </form>
+        </section>
+
+        <!-- Perfil de investidor -->
+        <section class="ascreen" id="a-profile">
+          <div class="a-progress"><i id="aProgFill" style="width:33%"></i></div>
+          <p class="a-step" id="aStepLbl">Pergunta 1 de 3</p>
+          <h2 id="aQ">—</h2>
+          <div class="a-opts" id="aOpts"></div>
+        </section>
+
+        <!-- Criando a conta (wallet Dynamic invisível) -->
+        <section class="ascreen" id="a-creating">
+          <div class="a-spinner" aria-hidden="true"></div>
+          <h2>Preparando tudo para você…</h2>
+          <ul class="a-checklist">
+            <li id="ck1">Criando sua conta</li>
+            <li id="ck2">Preparando seu cofre digital em USDC</li>
+            <li id="ck3">Ativando as proteções de segurança</li>
+          </ul>
+          <p class="a-powered">Carteira digital criada automaticamente, sem complicação — infraestrutura <b>Dynamic</b></p>
+        </section>
+
+        <!-- Pronto -->
+        <section class="ascreen" id="a-done">
+          <div class="a-big">🎉</div>
+          <h2 id="aDoneTitle">Tudo pronto!</h2>
+          <p class="a-sub" id="aDoneText">Sua conta já aceita Pix e rende em USDC.</p>
+          <button class="a-btn primary" id="aEnter">Entrar no app</button>
+        </section>
+      </div>
+
       <!-- ===== NAVEGAÇÃO ===== -->
       <nav class="nav" aria-label="Navegação principal">
         <span class="logo">DefiMind<i>.</i></span>
@@ -306,13 +449,13 @@
         </div>
         <div class="right">
           <span class="streak-chip" title="Dias seguidos guardando dinheiro">🔥 12 dias</span>
-          <span class="avatar">J</span>
+          <button class="avatar" id="avatarBtn" title="Sair da conta (demo)">J</button>
         </div>
       </nav>
 
       <!-- ========== INÍCIO ========== -->
       <section class="view active" id="view-home" aria-label="Início">
-        <h1 class="h1">Oi, João 👋</h1>
+        <h1 class="h1">Oi, <span id="helloName">João</span> 👋</h1>
         <p class="sub">Seu dinheiro está em <b>USDC</b> — uma moeda digital que vale sempre 1 dólar — e rendeu <b style="color:var(--green)">+2,41 USDC</b> hoje.</p>
 
         <div class="home-top">
@@ -983,6 +1126,128 @@
     var inp=document.getElementById('chatInput');
     var q=inp.value.trim(); if(!q) return;
     inp.value=''; ask(q);
+  });
+
+  /* ==================== FUNIL: LOGIN / CADASTRO / PERFIL ==================== */
+  var auth=document.getElementById('auth');
+  var ascreens=document.querySelectorAll('.ascreen');
+  var userName='João';
+  function aGoto(name){
+    ascreens.forEach(function(s){s.classList.toggle('active', s.id==='a-'+name);});
+  }
+  document.querySelectorAll('[data-a]').forEach(function(b){
+    b.addEventListener('click',function(){aGoto(b.dataset.a);});
+  });
+
+  function firstName(full){
+    var n=(full||'').trim().split(/\s+/)[0];
+    if(!n) return 'João';
+    return n.charAt(0).toUpperCase()+n.slice(1);
+  }
+  function finishAuth(){
+    document.getElementById('helloName').textContent=userName;
+    document.getElementById('avatarBtn').textContent=userName.charAt(0).toUpperCase();
+    auth.classList.add('hide');
+    setTimeout(function(){auth.style.display='none';},400);
+  }
+
+  /* login: qualquer e-mail/senha entra (demo) */
+  document.getElementById('loginForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var em=document.getElementById('loginEmail').value.trim();
+    var pw=document.getElementById('loginPass').value;
+    if(!em || !pw){ showToast('Preencha e-mail e senha para entrar 🙂'); return; }
+    userName='João';
+    finishAuth();
+    showToast('Bem-vindo de volta! 👋');
+  });
+
+  /* cadastro */
+  document.getElementById('signupForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var nm=document.getElementById('suName').value.trim();
+    var em=document.getElementById('suEmail').value.trim();
+    var pw=document.getElementById('suPass').value;
+    if(!nm){ showToast('Conta pra gente: como você se chama? 🙂'); return; }
+    if(em.indexOf('@')<0){ showToast('Esse e-mail não parece completo — falta o @'); return; }
+    if(pw.length<8){ showToast('A senha precisa de pelo menos 8 caracteres 🔒'); return; }
+    if(!document.getElementById('suTerms').checked){ showToast('Falta aceitar os termos para continuar'); return; }
+    userName=firstName(nm);
+    startProfile();
+    aGoto('profile');
+  });
+
+  /* perfil de investidor: 3 perguntas simples */
+  var QUESTIONS=[
+    { q:'O que você quer para o seu dinheiro?',
+      opts:[
+        {em:'🛡️', t:'Guardar com segurança', s:'Sem sustos, rendendo aos poucos', v:1},
+        {em:'⚖️', t:'Crescer com calma', s:'Um equilíbrio entre segurança e crescimento', v:2},
+        {em:'🚀', t:'Crescer o máximo', s:'Aceito mais risco para render mais', v:3}
+      ]},
+    { q:'Você já investiu antes?',
+      opts:[
+        {em:'🌱', t:'Nunca', s:'Vai ser minha primeira vez', v:1},
+        {em:'📗', t:'Um pouco', s:'Poupança, CDB ou parecido', v:2},
+        {em:'📈', t:'Sim, bastante', s:'Já conheço o mercado', v:3}
+      ]},
+    { q:'Se seu saldo balançar por uns meses, você…',
+      opts:[
+        {em:'😟', t:'Prefiro que não balance', s:'Quero ver só subir', v:1},
+        {em:'🙂', t:'Aguento um pouco', s:'Desde que cresça no fim', v:2},
+        {em:'😎', t:'Tranquilo, faz parte', s:'Penso no longo prazo', v:3}
+      ]}
+  ];
+  var qIdx=0, score=0;
+  var PROFILES={
+    calm:{name:'Tranquilo', pote:'Guardar com Segurança'},
+    mid:{name:'Equilibrado', pote:'Crescer com Calma'},
+    bold:{name:'Confiante', pote:'Crescer Mais Rápido'}
+  };
+  function startProfile(){ qIdx=0; score=0; renderQuestion(); }
+  function renderQuestion(){
+    var Q=QUESTIONS[qIdx];
+    document.getElementById('aStepLbl').textContent='Pergunta '+(qIdx+1)+' de '+QUESTIONS.length;
+    document.getElementById('aProgFill').style.width=((qIdx+1)/QUESTIONS.length*100)+'%';
+    document.getElementById('aQ').textContent=Q.q;
+    var box=document.getElementById('aOpts'); box.innerHTML='';
+    Q.opts.forEach(function(o){
+      var b=document.createElement('button');
+      var em=document.createElement('span'); em.className='em'; em.textContent=o.em;
+      var tx=document.createElement('span'); tx.textContent=o.t;
+      var sm=document.createElement('small'); sm.textContent=o.s;
+      tx.appendChild(sm);
+      b.appendChild(em); b.appendChild(tx);
+      b.addEventListener('click',function(){
+        score+=o.v; qIdx++;
+        if(qIdx<QUESTIONS.length){ renderQuestion(); }
+        else{ aGoto('creating'); runCreation(); }
+      });
+      box.appendChild(b);
+    });
+  }
+
+  /* criação da conta — a wallet (Dynamic) nasce invisível aqui */
+  function runCreation(){
+    ['ck1','ck2','ck3'].forEach(function(id){document.getElementById(id).classList.remove('done');});
+    setTimeout(function(){document.getElementById('ck1').classList.add('done');},700);
+    setTimeout(function(){document.getElementById('ck2').classList.add('done');},1500);
+    setTimeout(function(){document.getElementById('ck3').classList.add('done');},2300);
+    setTimeout(function(){
+      var p = score<=4 ? PROFILES.calm : (score<=7 ? PROFILES.mid : PROFILES.bold);
+      document.getElementById('aDoneTitle').textContent='Tudo pronto, '+userName+'!';
+      document.getElementById('aDoneText').innerHTML='Seu perfil de investidor é <b>'+p.name+'</b> — recomendamos começar pelo pote <b>'+p.pote+'</b>. Sua conta já aceita Pix e rende em USDC.';
+      aGoto('done');
+    },3100);
+  }
+  document.getElementById('aEnter').addEventListener('click',finishAuth);
+
+  /* sair (demo): avatar reabre o funil */
+  document.getElementById('avatarBtn').addEventListener('click',function(){
+    auth.style.display='flex';
+    setTimeout(function(){auth.classList.remove('hide');},30);
+    aGoto('welcome');
+    showToast('Você saiu da conta (demo) 👋');
   });
 })();
 </script>
