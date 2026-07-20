@@ -1,0 +1,988 @@
+<title>DefiMind — Demo Interativa</title>
+<style>
+  /* ============ TOKENS — página externa (tema claro/escuro) ============ */
+  :root{
+    --pg-bg:#EFEEE9;
+    --pg-ink:#131A16;
+    --pg-ink-2:#4C564F;
+    --pg-ink-3:#7A847D;
+    --pg-border:#DDDCD4;
+    --pg-green:#0E7A4A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{--pg-bg:#0B0F0D;--pg-ink:#EDF1EE;--pg-ink-2:#ADB8B0;--pg-ink-3:#77837B;--pg-border:#242D27;--pg-green:#2FB673}
+  }
+  :root[data-theme="dark"]{--pg-bg:#0B0F0D;--pg-ink:#EDF1EE;--pg-ink-2:#ADB8B0;--pg-ink-3:#77837B;--pg-border:#242D27;--pg-green:#2FB673}
+  :root[data-theme="light"]{--pg-bg:#EFEEE9;--pg-ink:#131A16;--pg-ink-2:#4C564F;--pg-ink-3:#7A847D;--pg-border:#DDDCD4;--pg-green:#0E7A4A}
+
+  /* ============ TOKENS — o app DefiMind (objeto de design, tema fixo) ============ */
+  :root{
+    --bg:#F8F8F5; --card:#FFFFFF; --ink:#121814; --ink-2:#525C55; --ink-3:#8A948C; --line:#E9E9E2;
+    --green:#0E7A4A; --green-deep:#0A5C38; --green-bright:#16A45E; --mint:#E7F2EB;
+    --gold:#A07C2C; --gold-soft:#F5EEDC; --rust:#B0563A; --rust-soft:#F7E8E2; --red:#C03A2B; --r:20px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--pg-bg);color:var(--pg-ink);
+    font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;padding:0;font-size:inherit}
+  button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:6px}
+
+  .wrap{max-width:1240px;margin:0 auto;padding:26px 20px 56px}
+  .intro{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+  .wordmark{font-size:19px;font-weight:800;letter-spacing:-0.02em}
+  .wordmark i{font-style:normal;color:var(--pg-green)}
+  .intro small{font-size:13px;color:var(--pg-ink-3)}
+
+  .browser{
+    background:#10150F;border-radius:18px;overflow:hidden;
+    box-shadow:0 24px 64px rgba(10,20,14,.18), 0 2px 10px rgba(10,20,14,.08);
+    border:1px solid var(--pg-border);
+  }
+  .browser-bar{display:flex;align-items:center;gap:8px;background:#10150F;padding:11px 16px}
+  .browser-bar i{width:10px;height:10px;border-radius:999px;background:#3A443C}
+  .browser-bar .url{margin-left:10px;font-size:12px;color:#9BA69E;background:#1B211B;border-radius:8px;padding:4px 14px}
+  .foot{text-align:center;font-size:12.5px;color:var(--pg-ink-3);margin-top:18px}
+
+  /* ============ O APP ============ */
+  .app{background:var(--bg);color:var(--ink);min-height:760px;position:relative;font-size:15px}
+
+  .nav{
+    display:flex;align-items:center;gap:4px;
+    padding:12px 24px;background:var(--card);border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:20;flex-wrap:wrap;
+  }
+  .nav .logo{font-size:17px;font-weight:800;letter-spacing:-0.02em;margin-right:14px}
+  .nav .logo i{font-style:normal;color:var(--green)}
+  .navlinks{display:flex;gap:2px;flex-wrap:wrap}
+  .navlink{font-size:13.5px;font-weight:600;color:var(--ink-2);padding:8px 13px;border-radius:999px}
+  .navlink:hover{background:var(--bg)}
+  .navlink.active{background:var(--mint);color:var(--green-deep)}
+  .nav .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .streak-chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#7A5D1E;background:var(--gold-soft);border-radius:999px;padding:6px 12px}
+  .avatar{width:36px;height:36px;border-radius:999px;background:var(--gold-soft);color:var(--gold);display:grid;place-items:center;font-weight:800;font-size:14px;border:1.5px solid #E8DDBE}
+
+  .view{display:none;padding:28px 24px 48px;max-width:1080px;margin:0 auto}
+  .view.active{display:block;animation:fadeUp .22s ease}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){.view.active{animation:none}.modal,.toast{transition:none !important}}
+
+  .h1{font-size:24px;font-weight:800;letter-spacing:-0.01em;margin:0 0 4px}
+  .sub{font-size:14px;color:var(--ink-2);margin:0 0 22px;max-width:62ch}
+  .sec-t{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin:0 0 12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+  .grid{display:grid;gap:14px}
+  .g-2{grid-template-columns:1fr 1fr}
+  .g-3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:860px){.g-2,.g-3{grid-template-columns:1fr}}
+
+  /* --- Início --- */
+  .home-top{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;margin-bottom:16px}
+  @media (max-width:860px){.home-top{grid-template-columns:1fr}}
+  .balance-card{
+    background:linear-gradient(150deg,#0C6B41 0%,#0A5C38 55%,#084A2E 100%);
+    color:#F2FBF6;border-radius:24px;padding:22px 22px 14px;
+    box-shadow:0 14px 32px rgba(10,92,56,.25);position:relative;
+  }
+  .balance-card .lbl{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#A9D9BF;display:flex;align-items:center;gap:8px}
+  .usdc-badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;background:rgba(255,255,255,.16);border-radius:999px;padding:3px 9px;color:#DFF6E9;letter-spacing:.04em}
+  .usdc-badge b{width:14px;height:14px;border-radius:999px;background:#DFF6E9;color:#0A5C38;display:inline-grid;place-items:center;font-size:9px;font-weight:900}
+  .eye-btn{width:30px;height:30px;border-radius:999px;display:grid;place-items:center;background:rgba(255,255,255,.14);color:#E9F7EF;margin-left:auto}
+  .eye-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .balance{font-size:36px;font-weight:800;letter-spacing:-0.02em;margin:8px 0 0;font-variant-numeric:tabular-nums}
+  .balance small{font-size:16px;font-weight:700;color:#A9D9BF}
+  .brl-eq{font-size:13px;color:#A9D9BF;margin:2px 0 6px;font-variant-numeric:tabular-nums}
+  .delta{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;background:rgba(255,255,255,.15);border-radius:999px;padding:4px 10px;color:#CFF2DE}
+  .spark-wrap{position:relative;margin-top:10px}
+  .spark{display:block;width:100%;height:60px}
+  .spark-tip{
+    position:absolute;top:-30px;transform:translateX(-50%);pointer-events:none;opacity:0;
+    background:#06331F;color:#DFF6E9;font-size:11.5px;font-weight:700;border-radius:8px;padding:3px 8px;white-space:nowrap;font-variant-numeric:tabular-nums;
+  }
+  .quick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-content:start}
+  .qbtn{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;font-size:14px;font-weight:700;color:var(--ink);transition:transform .12s ease;text-align:left}
+  .qbtn:active{transform:scale(.97)}
+  .qbtn i{flex:none;width:42px;height:42px;border-radius:14px;background:var(--mint);display:grid;place-items:center;color:var(--green)}
+  .qbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .qbtn small{display:block;font-size:12px;font-weight:500;color:var(--ink-3)}
+
+  /* --- Caixinha (rendimento ao vivo) --- */
+  .caixinha{
+    background:linear-gradient(135deg,#F5EEDC 0%,#F1E6C8 100%);
+    border:1px solid #E8DDBE;border-radius:24px;padding:20px 22px;margin-bottom:16px;
+    display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  }
+  .caixinha .pig{flex:none;width:54px;height:54px;border-radius:18px;background:#FFFDF6;display:grid;place-items:center;font-size:26px;border:1px solid #E8DDBE}
+  .caixinha .info{flex:1;min-width:220px}
+  .caixinha .t{font-size:16px;font-weight:800;color:#4A3A14}
+  .caixinha .s{font-size:12.5px;color:#7A5D1E}
+  .caixinha .live{margin-left:auto;text-align:right}
+  .caixinha .live-val{font-size:22px;font-weight:800;color:#4A3A14;font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+  .caixinha .live-val small{font-size:13px;color:#7A5D1E;font-weight:700}
+  .live-chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;color:#0A5C38;background:#E7F2EB;border-radius:999px;padding:3px 10px;font-variant-numeric:tabular-nums}
+  .live-chip .dot{width:7px;height:7px;border-radius:999px;background:#16A45E;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @media (prefers-reduced-motion: reduce){.live-chip .dot{animation:none}}
+  .caixinha .btn{flex:none;background:#4A3A14;color:#F5EEDC;font-size:13px;font-weight:800;border-radius:14px;padding:11px 18px;transition:transform .12s ease}
+  .caixinha .btn:active{transform:scale(.96)}
+
+  .pote{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;transition:transform .12s ease}
+  .pote:active{transform:scale(.98)}
+  .pote .ic{flex:none;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-weight:800;font-size:16px}
+  .pote .nm{font-weight:700;font-size:14.5px}
+  .pote .sb{font-size:12.5px;color:var(--ink-3)}
+  .pote .val{margin-left:auto;text-align:right}
+  .pote .val b{display:block;font-size:14.5px;font-variant-numeric:tabular-nums}
+  .pote .val span{font-size:12px;font-weight:700;color:var(--green-bright)}
+
+  .act{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .act:last-child{border-bottom:none;padding-bottom:4px}
+  .act .ic{flex:none;width:36px;height:36px;border-radius:12px;background:var(--mint);color:var(--green);display:grid;place-items:center}
+  .act .ic svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .act .t{font-size:14px;font-weight:600}
+  .act .d{font-size:12px;color:var(--ink-3)}
+  .act .v{margin-left:auto;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;text-align:right}
+  .act .v small{display:block;font-size:11px;font-weight:600;color:var(--ink-3)}
+  .act .v.pos{color:var(--green)}
+
+  /* --- Cartão --- */
+  .card-stage{display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start}
+  @media (max-width:860px){.card-stage{grid-template-columns:1fr}}
+  .bankcard{
+    aspect-ratio:1.586;border-radius:22px;padding:22px;position:relative;overflow:hidden;color:#F2FBF6;
+    background:linear-gradient(135deg,#0F2419 0%,#0A5C38 60%,#0C6B41 100%);
+    box-shadow:0 18px 40px rgba(10,92,56,.35);
+    display:flex;flex-direction:column;justify-content:space-between;
+    transition:filter .2s ease, opacity .2s ease;
+  }
+  .bankcard.blocked{filter:grayscale(.9);opacity:.6}
+  .bankcard .row1{display:flex;align-items:center;justify-content:space-between}
+  .bankcard .brand{font-size:16px;font-weight:800;letter-spacing:-0.01em}
+  .bankcard .brand i{font-style:normal;color:#8FE0B4}
+  .bankcard .chip{width:40px;height:30px;border-radius:6px;background:linear-gradient(135deg,#C9A356,#E6C87A);position:relative}
+  .bankcard .chip::after{content:"";position:absolute;inset:6px 8px;border:1px solid rgba(74,58,20,.5);border-radius:3px}
+  .bankcard .num{font-size:18px;font-weight:700;letter-spacing:.14em;font-variant-numeric:tabular-nums}
+  .bankcard .row3{display:flex;align-items:flex-end;justify-content:space-between;font-size:12px}
+  .bankcard .holder{text-transform:uppercase;letter-spacing:.08em;color:#CFEBD9}
+  .bankcard .flag{font-size:13px;font-weight:800;color:#DFF6E9}
+  .bankcard .usdc-mark{position:absolute;top:-30px;right:-30px;width:140px;height:140px;border-radius:999px;border:26px solid rgba(255,255,255,.06)}
+  .card-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+  @media (max-width:520px){.card-actions{grid-template-columns:repeat(2,1fr)}}
+  .cabtn{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink-2);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 6px;transition:transform .12s ease}
+  .cabtn:active{transform:scale(.95)}
+  .cabtn svg{width:20px;height:20px;stroke:var(--green);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .cabtn.on svg{stroke:var(--red)}
+  .cashback{display:flex;align-items:center;gap:14px;background:var(--gold-soft);border:1px solid #E8DDBE;border-radius:18px;padding:14px 16px;margin-bottom:14px}
+  .cashback .coin{flex:none;width:40px;height:40px;border-radius:999px;background:#FFFDF6;border:1px solid #E8DDBE;display:grid;place-items:center;font-weight:900;color:#7A5D1E;font-size:13px}
+  .cashback b{font-size:14.5px;color:#4A3A14}
+  .cashback span{display:block;font-size:12.5px;color:#7A5D1E}
+
+  /* --- Investir --- */
+  .plan{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;transition:transform .12s ease;display:flex;flex-direction:column;gap:10px}
+  .plan:active{transform:scale(.98)}
+  .plan .top{display:flex;align-items:center;gap:12px}
+  .plan .badge{margin-left:auto;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border-radius:999px;padding:4px 10px}
+  .plan .nm{font-size:16px;font-weight:800;letter-spacing:-0.01em}
+  .plan .tg{font-size:12.5px;color:var(--ink-3)}
+  .plan .row{display:flex;align-items:end;justify-content:space-between;gap:8px}
+  .plan .apy b{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .plan .apy span{font-size:11.5px;color:var(--ink-3);display:block}
+  .plan .min{font-size:12px;color:var(--ink-2);text-align:right}
+  .plan .min b{display:block;font-size:14px;font-variant-numeric:tabular-nums}
+  .plan .ic{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-weight:800;flex:none}
+  .risk{display:flex;gap:4px;align-items:center;font-size:12px;color:var(--ink-3)}
+  .risk i{width:16px;height:6px;border-radius:3px;background:var(--line)}
+  .risk i.on{background:currentColor}
+
+  .sim{margin-top:20px}
+  .sim-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:center}
+  @media (max-width:860px){.sim-grid{grid-template-columns:1fr}}
+  .sim .amount{font-size:28px;font-weight:800;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;margin:2px 0}
+  .sim .amount small{font-size:15px;font-weight:700;color:var(--ink-3)}
+  input[type=range]{width:100%;accent-color:var(--green);height:28px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .chip{font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:999px;background:var(--bg);border:1px solid var(--line);color:var(--ink-2)}
+  .chip.on{background:var(--green);border-color:var(--green);color:#fff}
+  .sim-result{text-align:center;background:var(--mint);border-radius:18px;padding:20px 14px}
+  .sim-result .l{font-size:12.5px;color:var(--ink-2)}
+  .sim-result .n{font-size:21px;font-weight:800;color:var(--green-deep);font-variant-numeric:tabular-nums}
+  .sim-result .ref{font-size:11.5px;color:var(--ink-3);margin-top:4px}
+
+  /* --- Portfólio --- */
+  .chart-card{position:relative}
+  .evo{display:block;width:100%;height:220px}
+  .evo-tip{position:absolute;pointer-events:none;opacity:0;background:var(--ink);color:#fff;font-size:12px;font-weight:700;border-radius:8px;padding:4px 9px;white-space:nowrap;font-variant-numeric:tabular-nums;transform:translate(-50%,-135%)}
+  .alloc-bar{display:flex;gap:2px;height:16px;border-radius:8px;overflow:hidden;margin:6px 0 12px}
+  .alloc-bar i{height:100%}
+  .alloc-leg{display:flex;flex-direction:column;gap:8px}
+  .alloc-leg .li{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-2)}
+  .alloc-leg .li i{width:10px;height:10px;border-radius:3px;flex:none}
+  .alloc-leg .li b{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--ink)}
+
+  /* --- Conquistas --- */
+  .level-card{display:flex;align-items:center;gap:18px}
+  .level-ring{flex:none;width:84px;height:84px;border-radius:999px;display:grid;place-items:center;background:conic-gradient(var(--gold) 0 68%, var(--line) 68% 100%)}
+  .level-ring i{width:66px;height:66px;border-radius:999px;background:var(--card);display:grid;place-items:center;font-weight:800;font-size:20px;color:var(--gold);font-style:normal}
+  .badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .badge-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 14px;text-align:center}
+  .badge-card .medal{width:52px;height:52px;border-radius:999px;margin:0 auto 10px;display:grid;place-items:center;background:var(--gold-soft);color:var(--gold)}
+  .badge-card .medal svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .badge-card b{display:block;font-size:13.5px;margin-bottom:2px}
+  .badge-card span{font-size:12px;color:var(--ink-3)}
+  .badge-card.locked{opacity:.55}
+  .badge-card.locked .medal{background:var(--bg);color:var(--ink-3)}
+
+  /* --- Assistente --- */
+  .chat-shell{max-width:640px;margin:0 auto}
+  .msgs{display:flex;flex-direction:column;gap:10px;min-height:300px}
+  .msg{max-width:78%;padding:12px 15px;border-radius:18px;font-size:14px;line-height:1.45}
+  .msg.bot{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px;align-self:flex-start}
+  .msg.user{background:var(--green);color:#fff;border-bottom-right-radius:6px;align-self:flex-end}
+  .typing{display:inline-flex;gap:4px;align-items:center;padding:13px 16px}
+  .typing i{width:6px;height:6px;border-radius:999px;background:var(--ink-3);animation:blink 1.2s infinite}
+  .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,70%,100%{opacity:.25}35%{opacity:1}}
+  @media (prefers-reduced-motion: reduce){.typing i{animation:none;opacity:.6}}
+  .sugg{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+  .sugg .chip{background:var(--card)}
+  .chat-inp{display:flex;gap:8px;margin-top:14px}
+  .chat-inp input{flex:1;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:13px 18px;font-size:14px;font-family:inherit;color:var(--ink)}
+  .chat-inp button{flex:none;width:46px;height:46px;border-radius:999px;background:var(--green);color:#fff;display:grid;place-items:center}
+  .chat-inp svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* --- modal do plano --- */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(8,14,10,.5);opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:40}
+  .modal-backdrop.open{opacity:1;pointer-events:auto}
+  .modal{
+    position:fixed;left:50%;top:50%;z-index:50;width:min(480px, calc(100vw - 32px));
+    transform:translate(-50%,-46%) scale(.97);opacity:0;pointer-events:none;
+    background:var(--card);color:var(--ink);border-radius:24px;padding:24px;max-height:86vh;overflow-y:auto;
+    transition:opacity .2s ease, transform .2s ease;box-shadow:0 30px 80px rgba(10,20,14,.35);
+  }
+  .modal.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+  .modal h3{font-size:20px;font-weight:800;margin:0 0 2px}
+  .modal .tg{font-size:13px;color:var(--ink-3);margin:0 0 12px}
+  .modal p.desc{font-size:14px;color:var(--ink-2);margin:0 0 16px}
+  .facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+  .fact{background:var(--bg);border-radius:14px;padding:10px 12px}
+  .fact .l{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3)}
+  .fact .v{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+  .cta{display:block;width:100%;background:var(--green);color:#fff;font-size:15.5px;font-weight:800;border-radius:16px;padding:15px;text-align:center;transition:transform .12s ease;margin-top:16px}
+  .cta:active{transform:scale(.98)}
+  .cta-note{text-align:center;font-size:12px;color:var(--ink-3);margin-top:8px}
+
+  .toast{
+    position:fixed;left:50%;bottom:34px;transform:translate(-50%,16px);z-index:70;
+    background:var(--ink);color:#fff;font-size:13.5px;font-weight:600;
+    padding:12px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+
+<div class="wrap">
+  <div class="intro">
+    <div class="wordmark">DefiMind<i>.</i> — sua conta que rende em dólar</div>
+    <small>Demo interativa · dados ilustrativos</small>
+  </div>
+
+  <div class="browser">
+    <div class="browser-bar"><i></i><i></i><i></i><span class="url">app.defimind.com</span></div>
+
+    <div class="app">
+      <!-- ===== NAVEGAÇÃO ===== -->
+      <nav class="nav" aria-label="Navegação principal">
+        <span class="logo">DefiMind<i>.</i></span>
+        <div class="navlinks">
+          <button class="navlink active" data-view="home">Início</button>
+          <button class="navlink" data-view="cardv">Cartão</button>
+          <button class="navlink" data-view="invest">Investir</button>
+          <button class="navlink" data-view="portfolio">Portfólio</button>
+          <button class="navlink" data-view="rewards">Conquistas</button>
+          <button class="navlink" data-view="chat">Assistente</button>
+        </div>
+        <div class="right">
+          <span class="streak-chip" title="Dias seguidos guardando dinheiro">🔥 12 dias</span>
+          <span class="avatar">J</span>
+        </div>
+      </nav>
+
+      <!-- ========== INÍCIO ========== -->
+      <section class="view active" id="view-home" aria-label="Início">
+        <h1 class="h1">Oi, João 👋</h1>
+        <p class="sub">Seu dinheiro está em <b>USDC</b> — uma moeda digital que vale sempre 1 dólar — e rendeu <b style="color:var(--green)">+2,41 USDC</b> hoje.</p>
+
+        <div class="home-top">
+          <div class="balance-card">
+            <div class="lbl">Saldo total
+              <span class="usdc-badge"><b>$</b>USDC</span>
+              <button class="eye-btn" id="eyeBtn" aria-label="Mostrar ou esconder saldo" aria-pressed="false">
+                <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg>
+              </button>
+            </div>
+            <div class="balance" id="balanceValue">2.415,80 <small>USDC</small></div>
+            <div class="brl-eq" id="brlEq">≈ R$ 12.852,05</div>
+            <span class="delta" id="deltaChip">▲ + 2,41 USDC hoje</span>
+            <div class="spark-wrap">
+              <svg class="spark" id="heroSpark" viewBox="0 0 640 60" preserveAspectRatio="none" aria-label="Evolução do saldo nos últimos 30 dias"></svg>
+              <div class="spark-tip" id="heroTip"></div>
+            </div>
+          </div>
+
+          <div class="quick">
+            <button class="qbtn" data-toast="No app real: Pix entra e vira USDC na hora 💸">
+              <i><svg viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg></i>
+              <span>Depositar<small>Pix vira USDC na hora</small></span>
+            </button>
+            <button class="qbtn" data-goto="invest">
+              <i><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></i>
+              <span>Investir<small>A partir de 20 USDC</small></span>
+            </button>
+            <button class="qbtn" data-toast="No app real: USDC vira Pix na sua conta em segundos 🙂">
+              <i><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M6 13l6 6 6-6"/></svg></i>
+              <span>Resgatar<small>Sem multa, sem espera</small></span>
+            </button>
+            <button class="qbtn" data-goto="cardv">
+              <i><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg></i>
+              <span>Cartão<small>Pague com seu saldo</small></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Caixinha rendendo ao vivo -->
+        <div class="caixinha">
+          <div class="pig">🐷</div>
+          <div class="info">
+            <div class="t">Caixinha do dia a dia</div>
+            <div class="s">Rende <b>8% ao ano</b>, todo segundo · resgate na hora</div>
+            <span class="live-chip" style="margin-top:6px"><span class="dot"></span>rendendo agora</span>
+          </div>
+          <div class="live">
+            <div class="live-val"><span id="caixinhaVal">320,450000</span> <small>USDC</small></div>
+            <div class="s" style="font-variant-numeric:tabular-nums">+<span id="caixinhaHoje">0,058</span> USDC hoje</div>
+          </div>
+          <button class="btn" data-toast="No app real: escolha o valor e a Caixinha começa a render 🐷">Guardar mais</button>
+        </div>
+
+        <div class="grid g-2">
+          <div>
+            <h2 class="sec-t">Seus potes de investimento</h2>
+            <div class="grid" style="gap:10px">
+              <button class="pote" data-open-plan="safe">
+                <span class="ic" style="background:var(--mint);color:var(--green)">S</span>
+                <span><span class="nm">Guardar com Segurança</span><br><span class="sb">Muito estável · 4–7% ao ano</span></span>
+                <span class="val"><b class="money">1.548,00 USDC</b><span>+ 3,95 este mês</span></span>
+              </button>
+              <button class="pote" data-open-plan="steady">
+                <span class="ic" style="background:var(--gold-soft);color:var(--gold)">C</span>
+                <span><span class="nm">Crescer com Calma</span><br><span class="sb">Equilíbrio · 9–16% ao ano</span></span>
+                <span class="val"><b class="money">547,30 USDC</b><span>+ 2,46 este mês</span></span>
+              </button>
+              <button class="pote" data-goto="invest">
+                <span class="ic" style="background:var(--bg);color:var(--ink-3)">+</span>
+                <span><span class="nm">Abrir um pote novo</span><br><span class="sb">Leva menos de um minuto</span></span>
+              </button>
+            </div>
+          </div>
+          <div>
+            <h2 class="sec-t">Últimas atividades</h2>
+            <div class="card">
+              <div class="act">
+                <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v10"/><path d="M8 9l4 4 4-4"/><path d="M4 17h16v4H4z"/></svg></span>
+                <span><span class="t">Rendimento recebido</span><br><span class="d">Hoje, 06:00</span></span>
+                <span class="v pos money">+ 2,41 USDC</span>
+              </div>
+              <div class="act">
+                <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 21V7"/><path d="M8 11l4-4 4 4"/><path d="M4 3h16"/></svg></span>
+                <span><span class="t">Depósito via Pix</span><br><span class="d">Ontem, 14:32 · R$ 500,00</span></span>
+                <span class="v pos money">+ 94,05 USDC</span>
+              </div>
+              <div class="act">
+                <span class="ic" style="background:var(--rust-soft);color:var(--rust)"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg></span>
+                <span><span class="t">Compra no cartão — iFood</span><br><span class="d">Ontem, 20:12 · R$ 54,90</span></span>
+                <span class="v money">− 10,33 USDC<small>+0,10 de volta</small></span>
+              </div>
+              <div class="act">
+                <span class="ic" style="background:var(--gold-soft);color:var(--gold)"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg></span>
+                <span><span class="t">Conquista: 10 dias seguidos guardando</span><br><span class="d">Quinta, 08:00</span></span>
+                <span class="v" style="color:var(--gold)">+50 XP</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== CARTÃO ========== -->
+      <section class="view" id="view-cardv" aria-label="Cartão">
+        <h1 class="h1">Seu cartão</h1>
+        <p class="sub">Pague qualquer compra com seu saldo em USDC — a conversão para reais acontece sozinha na hora. E toda compra devolve <b>1% em USDC</b>.</p>
+
+        <div class="card-stage">
+          <div>
+            <div class="bankcard" id="bankcard">
+              <span class="usdc-mark" aria-hidden="true"></span>
+              <div class="row1">
+                <span class="brand">DefiMind<i>.</i></span>
+                <span class="chip"></span>
+              </div>
+              <div class="num" id="cardNum">5312 •••• •••• 4519</div>
+              <div class="row3">
+                <span class="holder">João M Silva</span>
+                <span>12/29</span>
+                <span class="flag">VISA</span>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button class="cabtn" id="blockBtn" aria-pressed="false">
+                <svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                <span id="blockLbl">Bloquear</span>
+              </button>
+              <button class="cabtn" id="showDataBtn" aria-pressed="false">
+                <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/></svg>
+                <span>Ver dados</span>
+              </button>
+              <button class="cabtn" data-toast="No app real: cria um cartão virtual novo em segundos 💳">
+                <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M12 9v6"/><path d="M9 12h6"/></svg>
+                <span>Virtual novo</span>
+              </button>
+              <button class="cabtn" data-toast="No app real: você define o limite por dia 🙂">
+                <svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M6 16l4-8 4 5 4-9"/></svg>
+                <span>Limites</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="cashback">
+              <span class="coin">$</span>
+              <span><b>12,40 USDC de volta até agora</b><span>Cashback de 1% em toda compra, direto na sua Caixinha</span></span>
+            </div>
+
+            <h2 class="sec-t">Últimas compras</h2>
+            <div class="card">
+              <div class="act">
+                <span class="ic" style="background:var(--rust-soft);color:var(--rust)">🍔</span>
+                <span><span class="t">iFood</span><br><span class="d">Ontem, 20:12 · R$ 54,90</span></span>
+                <span class="v money">− 10,33 USDC<small>+0,10 de volta</small></span>
+              </div>
+              <div class="act">
+                <span class="ic" style="background:var(--mint);color:var(--green)">🚗</span>
+                <span><span class="t">Uber</span><br><span class="d">Ontem, 18:40 · R$ 23,50</span></span>
+                <span class="v money">− 4,42 USDC<small>+0,04 de volta</small></span>
+              </div>
+              <div class="act">
+                <span class="ic" style="background:var(--gold-soft);color:var(--gold)">🛒</span>
+                <span><span class="t">Supermercado Bom Preço</span><br><span class="d">Sábado, 11:05 · R$ 187,20</span></span>
+                <span class="v money">− 35,21 USDC<small>+0,35 de volta</small></span>
+              </div>
+              <div class="act">
+                <span class="ic" style="background:var(--mint);color:var(--green)">💊</span>
+                <span><span class="t">Farmácia Vida</span><br><span class="d">Sexta, 16:22 · R$ 42,10</span></span>
+                <span class="v money">− 7,92 USDC<small>+0,08 de volta</small></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== INVESTIR ========== -->
+      <section class="view" id="view-invest" aria-label="Investir">
+        <h1 class="h1">Escolha um pote</h1>
+        <p class="sub">Seu dinheiro fica sempre em USDC (1 USDC = 1 dólar) e cada pote faz ele crescer de um jeito. Toque em um para conhecer.</p>
+
+        <div class="grid g-3">
+          <button class="plan" data-open-plan="safe">
+            <span class="top">
+              <span class="ic" style="background:var(--mint);color:var(--green)">S</span>
+              <span><span class="nm">Guardar com Segurança</span><br><span class="tg">Estável e protegido</span></span>
+              <span class="badge" style="background:var(--mint);color:var(--green-deep)">Para começar</span>
+            </span>
+            <span class="row">
+              <span class="apy"><b>4–7%</b><span>ao ano, em dólar</span></span>
+              <span class="min">a partir de<b>20 USDC</b></span>
+            </span>
+            <span class="risk" style="color:var(--green)"><i class="on"></i><i></i><i></i><span style="margin-left:6px">Quase não balança</span></span>
+          </button>
+
+          <button class="plan" data-open-plan="steady">
+            <span class="top">
+              <span class="ic" style="background:var(--gold-soft);color:var(--gold)">C</span>
+              <span><span class="nm">Crescer com Calma</span><br><span class="tg">Crescimento equilibrado</span></span>
+              <span class="badge" style="background:var(--gold-soft);color:#7A5D1E">Mais escolhido</span>
+            </span>
+            <span class="row">
+              <span class="apy"><b>9–16%</b><span>ao ano, em dólar</span></span>
+              <span class="min">a partir de<b>100 USDC</b></span>
+            </span>
+            <span class="risk" style="color:var(--gold)"><i class="on"></i><i class="on"></i><i></i><span style="margin-left:6px">Balança um pouco</span></span>
+          </button>
+
+          <button class="plan" data-open-plan="fast">
+            <span class="top">
+              <span class="ic" style="background:var(--rust-soft);color:var(--rust)">R</span>
+              <span><span class="nm">Crescer Mais Rápido</span><br><span class="tg">Mais sobe-e-desce</span></span>
+              <span class="badge" style="background:var(--rust-soft);color:#8A4128">Para experientes</span>
+            </span>
+            <span class="row">
+              <span class="apy"><b>20–45%</b><span>ao ano, em dólar</span></span>
+              <span class="min">a partir de<b>400 USDC</b></span>
+            </span>
+            <span class="risk" style="color:var(--rust)"><i class="on"></i><i class="on"></i><i class="on"></i><span style="margin-left:6px">Balança bastante</span></span>
+          </button>
+        </div>
+
+        <div class="sim card">
+          <h2 class="sec-t" style="margin-bottom:4px">Simule seu rendimento</h2>
+          <div class="sim-grid">
+            <div>
+              <div class="amount"><span id="simAmount">1.000</span> <small>USDC</small></div>
+              <input type="range" id="simRange" min="20" max="10000" step="20" value="1000" aria-label="Quanto você quer investir">
+              <div class="chips" id="simPeriods" role="group" aria-label="Por quanto tempo">
+                <button class="chip" data-months="1">1 mês</button>
+                <button class="chip" data-months="6">6 meses</button>
+                <button class="chip on" data-months="12">1 ano</button>
+                <button class="chip" data-months="24">2 anos</button>
+                <button class="chip" data-months="60">5 anos</button>
+              </div>
+            </div>
+            <div class="sim-result">
+              <div class="l">Você teria entre</div>
+              <div class="n" id="simResult">1.090 e 1.160 USDC</div>
+              <div class="ref">no pote Crescer com Calma (9–16% ao ano) · em dólar</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== PORTFÓLIO ========== -->
+      <section class="view" id="view-portfolio" aria-label="Portfólio">
+        <h1 class="h1">Seu portfólio</h1>
+        <p class="sub">Como seu dinheiro está dividido e como ele cresceu — tudo em USDC, sem letra miúda.</p>
+
+        <div class="grid g-2">
+          <div class="card chart-card">
+            <h2 class="sec-t">Crescimento em 6 meses (USDC)</h2>
+            <svg class="evo" id="evoChart" viewBox="0 0 560 220" preserveAspectRatio="none" aria-label="Evolução do saldo nos últimos 6 meses"></svg>
+            <div class="evo-tip" id="evoTip"></div>
+          </div>
+          <div class="card">
+            <h2 class="sec-t">Onde seu dinheiro está</h2>
+            <div class="alloc-bar" aria-hidden="true">
+              <i style="width:64%;background:#0E7A4A"></i><i style="width:23%;background:#A07C2C"></i><i style="width:13%;background:#B0563A"></i>
+            </div>
+            <div class="alloc-leg">
+              <div class="li"><i style="background:#0E7A4A"></i>Potes de investimento<b>64%</b></div>
+              <div class="li"><i style="background:#A07C2C"></i>Caixinha do dia a dia<b>23%</b></div>
+              <div class="li"><i style="background:#B0563A"></i>Livre para usar no cartão<b>13%</b></div>
+            </div>
+            <h2 class="sec-t" style="margin-top:20px">Resumo</h2>
+            <div class="alloc-leg">
+              <div class="li">Total guardado<b class="money">2.415,80 USDC</b></div>
+              <div class="li">Quanto já rendeu<b class="money" style="color:var(--green)">+ 141,20 USDC</b></div>
+              <div class="li">Cashback do cartão<b class="money" style="color:var(--gold)">+ 12,40 USDC</b></div>
+              <div class="li">Valor em reais hoje<b class="money">≈ R$ 12.852,05</b></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== CONQUISTAS ========== -->
+      <section class="view" id="view-rewards" aria-label="Conquistas">
+        <h1 class="h1">Suas conquistas</h1>
+        <p class="sub">Guardar dinheiro também pode ser divertido. Continue a sequência e desbloqueie medalhas.</p>
+
+        <div class="grid g-2" style="margin-bottom:22px">
+          <div class="card level-card">
+            <div class="level-ring"><i>7</i></div>
+            <div>
+              <b style="font-size:16px">Nível 7 — Poupador Dedicado</b>
+              <p style="margin:4px 0 0;font-size:13px;color:var(--ink-3)">340 XP de 500 para o nível 8. Cada depósito e cada dia de sequência vale XP.</p>
+            </div>
+          </div>
+          <div class="card level-card">
+            <div style="font-size:40px">🔥</div>
+            <div>
+              <b style="font-size:16px">12 dias seguidos guardando</b>
+              <p style="margin:4px 0 0;font-size:13px;color:var(--ink-3)">Seu recorde é 18 dias. Guarde qualquer valor hoje para manter a sequência viva.</p>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="sec-t">Medalhas</h2>
+        <div class="badges">
+          <div class="badge-card">
+            <div class="medal"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg></div>
+            <b>Primeiro passo</b><span>Fez o primeiro depósito</span>
+          </div>
+          <div class="badge-card">
+            <div class="medal"><svg viewBox="0 0 24 24"><path d="M12 3v10"/><path d="M8 9l4 4 4-4"/><path d="M4 17h16v4H4z"/></svg></div>
+            <b>Primeira colheita</b><span>Recebeu o primeiro rendimento</span>
+          </div>
+          <div class="badge-card">
+            <div class="medal"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg></div>
+            <b>Primeira compra</b><span>Usou o cartão DefiMind</span>
+          </div>
+          <div class="badge-card locked">
+            <div class="medal"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+            <b>Maratonista</b><span>30 dias seguidos guardando</span>
+          </div>
+          <div class="badge-card locked">
+            <div class="medal"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+            <b>Primeiros 5.000</b><span>Chegou a 5.000 USDC guardados</span>
+          </div>
+          <div class="badge-card locked">
+            <div class="medal"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+            <b>Explorador</b><span>Testou os três potes</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== ASSISTENTE ========== -->
+      <section class="view" id="view-chat" aria-label="Assistente">
+        <div class="chat-shell">
+          <h1 class="h1">Assistente</h1>
+          <p class="sub">Pergunte qualquer coisa sobre o seu dinheiro. Eu explico sem palavras difíceis.</p>
+          <div class="msgs" id="msgs">
+            <div class="msg bot">Oi, João! 👋 Sou o assistente do DefiMind. Pode perguntar o que quiser — de "o que é USDC?" até "quanto rendeu este mês?" 🙂</div>
+            <div class="sugg" id="suggestions">
+              <button class="chip" data-q="O que é USDC?">O que é USDC?</button>
+              <button class="chip" data-q="Quanto rendeu este mês?">Quanto rendeu este mês?</button>
+              <button class="chip" data-q="Meu dinheiro está seguro?">Meu dinheiro está seguro?</button>
+              <button class="chip" data-q="Posso resgatar quando quiser?">Posso resgatar quando quiser?</button>
+            </div>
+          </div>
+          <form class="chat-inp" id="chatForm">
+            <input type="text" id="chatInput" placeholder="Escreva sua pergunta…" aria-label="Escreva sua pergunta">
+            <button type="submit" aria-label="Enviar">
+              <svg viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ===== MODAL DO PLANO ===== -->
+      <div class="modal-backdrop" id="modalBackdrop"></div>
+      <div class="modal" id="planModal" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+        <h3 id="sheetTitle">—</h3>
+        <p class="tg" id="sheetTagline">—</p>
+        <p class="desc" id="sheetDesc">—</p>
+        <div class="facts">
+          <div class="fact"><div class="l">Rende por ano</div><div class="v" id="sheetApy">—</div></div>
+          <div class="fact"><div class="l">Começa com</div><div class="v" id="sheetMin">—</div></div>
+          <div class="fact"><div class="l">Sobe e desce?</div><div class="v" id="sheetMove" style="font-size:13.5px">—</div></div>
+          <div class="fact"><div class="l">Resgate</div><div class="v" style="font-size:13.5px">Quando quiser</div></div>
+        </div>
+        <div class="sec-t" style="margin-bottom:8px">O que tem dentro</div>
+        <div class="alloc-bar" id="allocBar" aria-hidden="true"></div>
+        <div class="alloc-leg" id="allocLeg"></div>
+        <button class="cta" id="sheetCta">Começar com 20 USDC</button>
+        <div class="cta-note">Você pode tirar o dinheiro a qualquer momento, sem multa.</div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+    </div>
+  </div>
+
+  <p class="foot">Protótipo interativo do DefiMind — valores ilustrativos para demonstração. 1 USDC = 1 dólar americano.</p>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var nf2 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  var nf0 = new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0});
+  var nf6 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:6,maximumFractionDigits:6});
+
+  /* ---------- navegação ---------- */
+  var links = document.querySelectorAll('.navlink');
+  var views = document.querySelectorAll('.view');
+  function goto(name){
+    links.forEach(function(t){t.classList.toggle('active', t.dataset.view===name);});
+    views.forEach(function(v){v.classList.toggle('active', v.id==='view-'+name);});
+  }
+  links.forEach(function(t){t.addEventListener('click',function(){goto(t.dataset.view);});});
+  document.querySelectorAll('[data-goto]').forEach(function(b){
+    b.addEventListener('click',function(){goto(b.dataset.goto);});
+  });
+
+  /* ---------- toast ---------- */
+  var toast = document.getElementById('toast'); var toastTimer;
+  function showToast(msg){
+    toast.textContent = msg; toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){toast.classList.remove('show');},2400);
+  }
+  document.querySelectorAll('[data-toast]').forEach(function(b){
+    b.addEventListener('click',function(){showToast(b.dataset.toast);});
+  });
+
+  /* ---------- esconder saldo ---------- */
+  var hidden=false, stored=[];
+  var balanceValue=document.getElementById('balanceValue');
+  var brlEq=document.getElementById('brlEq');
+  var deltaChip=document.getElementById('deltaChip');
+  var eyeBtn=document.getElementById('eyeBtn');
+  function moneyEls(){return document.querySelectorAll('.money');}
+  eyeBtn.addEventListener('click',function(){
+    hidden=!hidden;
+    eyeBtn.setAttribute('aria-pressed',String(hidden));
+    if(hidden){
+      balanceValue.innerHTML='•••••• <small>USDC</small>';
+      brlEq.textContent='≈ R$ ••••••';
+      deltaChip.textContent='▲ + •••• hoje';
+      stored=[];
+      moneyEls().forEach(function(el){stored.push(el.innerHTML); el.textContent='••••';});
+    }else{
+      balanceValue.innerHTML='2.415,80 <small>USDC</small>';
+      brlEq.textContent='≈ R$ 12.852,05';
+      deltaChip.textContent='▲ + 2,41 USDC hoje';
+      moneyEls().forEach(function(el,i){ if(stored[i]!==undefined) el.innerHTML=stored[i]; });
+    }
+  });
+
+  /* ---------- Caixinha ao vivo (8% a.a. sobre 320,45 USDC) ---------- */
+  var caixinhaBase=320.45;
+  var perSecond=caixinhaBase*0.08/365/24/3600; /* ≈ 0,0000008 USDC/s */
+  var start=Date.now();
+  var caixinhaEl=document.getElementById('caixinhaVal');
+  var caixinhaHoje=document.getElementById('caixinhaHoje');
+  var hojeBase=0.058;
+  setInterval(function(){
+    var t=(Date.now()-start)/1000;
+    caixinhaEl.textContent=nf6.format(caixinhaBase + perSecond*t);
+    caixinhaHoje.textContent=nf2.format(hojeBase + perSecond*t).replace('.',',');
+  },120);
+
+  /* ---------- gráficos ---------- */
+  var heroData=[], v=2274;
+  for(var i=0;i<30;i++){
+    v += 3.4 + Math.sin(i/3.1)*4.9 + (i%7===0? -6.4: 1.5);
+    heroData.push(Math.round(v*100)/100);
+  }
+  heroData[29]=2415.80;
+
+  function buildLine(svg, data, opts){
+    var vb=svg.viewBox.baseVal, W=vb.width, H=vb.height;
+    var pad=opts.pad||6;
+    var min=Math.min.apply(null,data), max=Math.max.apply(null,data);
+    var span=(max-min)||1;
+    var pts=data.map(function(d,i){
+      return [pad + i*(W-2*pad)/(data.length-1), H-pad-((d-min)/span)*(H-2*pad-(opts.top||8))];
+    });
+    var line=pts.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ');
+    var area=line+' L'+pts[pts.length-1][0].toFixed(1)+','+H+' L'+pts[0][0].toFixed(1)+','+H+' Z';
+    var ns='http://www.w3.org/2000/svg';
+    if(opts.grid){
+      for(var g=1;g<=3;g++){
+        var gl=document.createElementNS(ns,'line');
+        var gy=pad+g*(H-2*pad)/4;
+        gl.setAttribute('x1',pad);gl.setAttribute('x2',W-pad);gl.setAttribute('y1',gy);gl.setAttribute('y2',gy);
+        gl.setAttribute('stroke',opts.gridColor);gl.setAttribute('stroke-width','1');
+        svg.appendChild(gl);
+      }
+    }
+    var a=document.createElementNS(ns,'path');
+    a.setAttribute('d',area); a.setAttribute('fill',opts.fill);
+    svg.appendChild(a);
+    var l=document.createElementNS(ns,'path');
+    l.setAttribute('d',line); l.setAttribute('fill','none');
+    l.setAttribute('stroke',opts.stroke); l.setAttribute('stroke-width',opts.width||2);
+    l.setAttribute('stroke-linecap','round'); l.setAttribute('stroke-linejoin','round');
+    svg.appendChild(l);
+    var end=document.createElementNS(ns,'circle');
+    end.setAttribute('cx',pts[pts.length-1][0]); end.setAttribute('cy',pts[pts.length-1][1]);
+    end.setAttribute('r',3.6); end.setAttribute('fill',opts.dot);
+    svg.appendChild(end);
+    var cursor=document.createElementNS(ns,'circle');
+    cursor.setAttribute('r',4); cursor.setAttribute('fill',opts.dot); cursor.setAttribute('opacity','0');
+    svg.appendChild(cursor);
+    var vline=document.createElementNS(ns,'line');
+    vline.setAttribute('stroke',opts.stroke); vline.setAttribute('stroke-width','1');
+    vline.setAttribute('stroke-dasharray','3 3'); vline.setAttribute('opacity','0');
+    vline.setAttribute('y1',pad); vline.setAttribute('y2',H-pad);
+    svg.appendChild(vline);
+    return {pts:pts, cursor:cursor, vline:vline, W:W, H:H};
+  }
+
+  function nearestIdx(built, svg, ev){
+    var r=svg.getBoundingClientRect();
+    var x=(ev.clientX-r.left)/r.width*built.W;
+    var idx=0,best=1e9;
+    built.pts.forEach(function(p,i){var d=Math.abs(p[0]-x); if(d<best){best=d;idx=i;}});
+    return idx;
+  }
+
+  var heroSvg=document.getElementById('heroSpark');
+  var heroTip=document.getElementById('heroTip');
+  var heroBuilt=buildLine(heroSvg,heroData,{fill:'rgba(255,255,255,.10)',stroke:'#8FE0B4',dot:'#C9F5DC',pad:6,width:2});
+  heroSvg.addEventListener('pointermove',function(ev){
+    var idx=nearestIdx(heroBuilt,heroSvg,ev);
+    var p=heroBuilt.pts[idx];
+    heroBuilt.cursor.setAttribute('cx',p[0]); heroBuilt.cursor.setAttribute('cy',p[1]); heroBuilt.cursor.setAttribute('opacity','1');
+    heroBuilt.vline.setAttribute('x1',p[0]); heroBuilt.vline.setAttribute('x2',p[0]); heroBuilt.vline.setAttribute('opacity','.5');
+    heroTip.style.opacity='1';
+    heroTip.style.left=(p[0]/heroBuilt.W*100)+'%';
+    var daysAgo=29-idx;
+    heroTip.textContent=(daysAgo===0?'hoje':daysAgo+'d atrás')+' · '+nf2.format(heroData[idx])+' USDC';
+  });
+  heroSvg.addEventListener('pointerleave',function(){
+    heroBuilt.cursor.setAttribute('opacity','0'); heroBuilt.vline.setAttribute('opacity','0'); heroTip.style.opacity='0';
+  });
+
+  var evoData=[2144,2165,2192,2223,2255,2283,2306,2329,2349,2372,2394,2415.80];
+  var evoLabels=['fev','fev','mar','mar','abr','abr','mai','mai','jun','jun','jul','jul'];
+  var evoSvg=document.getElementById('evoChart');
+  var evoTip=document.getElementById('evoTip');
+  var evoBuilt=buildLine(evoSvg,evoData,{fill:'rgba(14,122,74,.10)',stroke:'#0E7A4A',dot:'#0A5C38',pad:10,width:2.5,grid:true,gridColor:'#EFEFE8',top:16});
+  evoSvg.addEventListener('pointermove',function(ev){
+    var idx=nearestIdx(evoBuilt,evoSvg,ev);
+    var p=evoBuilt.pts[idx];
+    evoBuilt.cursor.setAttribute('cx',p[0]); evoBuilt.cursor.setAttribute('cy',p[1]); evoBuilt.cursor.setAttribute('opacity','1');
+    evoBuilt.vline.setAttribute('x1',p[0]); evoBuilt.vline.setAttribute('x2',p[0]); evoBuilt.vline.setAttribute('opacity','.5');
+    var card=evoSvg.parentElement;
+    var cr=card.getBoundingClientRect(), sr=evoSvg.getBoundingClientRect();
+    evoTip.style.opacity='1';
+    evoTip.style.left=(sr.left-cr.left + p[0]/evoBuilt.W*sr.width)+'px';
+    evoTip.style.top=(sr.top-cr.top + p[1]/evoBuilt.H*sr.height)+'px';
+    evoTip.textContent=evoLabels[idx]+' · '+nf2.format(evoData[idx])+' USDC';
+  });
+  evoSvg.addEventListener('pointerleave',function(){
+    evoBuilt.cursor.setAttribute('opacity','0'); evoBuilt.vline.setAttribute('opacity','0'); evoTip.style.opacity='0';
+  });
+
+  /* ---------- cartão ---------- */
+  var bankcard=document.getElementById('bankcard');
+  var blockBtn=document.getElementById('blockBtn');
+  var blockLbl=document.getElementById('blockLbl');
+  var blocked=false;
+  blockBtn.addEventListener('click',function(){
+    blocked=!blocked;
+    bankcard.classList.toggle('blocked',blocked);
+    blockBtn.setAttribute('aria-pressed',String(blocked));
+    blockBtn.classList.toggle('on',blocked);
+    blockLbl.textContent=blocked?'Desbloquear':'Bloquear';
+    showToast(blocked?'Cartão bloqueado. Ninguém compra nada 🔒':'Cartão desbloqueado. Tudo certo de novo ✅');
+  });
+  var cardNum=document.getElementById('cardNum');
+  var showDataBtn=document.getElementById('showDataBtn');
+  var showingNum=false;
+  showDataBtn.addEventListener('click',function(){
+    showingNum=!showingNum;
+    showDataBtn.setAttribute('aria-pressed',String(showingNum));
+    cardNum.textContent=showingNum?'5312 9004 1187 4519':'5312 •••• •••• 4519';
+    if(showingNum) showToast('Número visível — dados fictícios de demonstração 🙂');
+  });
+
+  /* ---------- planos / modal ---------- */
+  var PLANS={
+    safe:{
+      name:'Guardar com Segurança', tagline:'Estável e protegido',
+      desc:'O jeito mais simples de começar. Seu USDC fica em reservas estáveis, rendendo um pouco todo ano — quase sem sobe-e-desce. Ótimo para quem não quer surpresa.',
+      apy:'4–7%', min:'20 USDC', move:'Quase nada', cta:'Começar com 20 USDC',
+      alloc:[{n:'Reservas estáveis em USDC',p:80,c:'#0E7A4A'},{n:'Estratégias de rendimento',p:15,c:'#A07C2C'},{n:'Reserva de caixa',p:5,c:'#B0563A'}]
+    },
+    steady:{
+      name:'Crescer com Calma', tagline:'Crescimento equilibrado',
+      desc:'Uma mistura equilibrada, feita para crescer com o tempo balançando só um pouco no caminho. A escolha do meio, boa para a maioria das pessoas.',
+      apy:'9–16%', min:'100 USDC', move:'Um pouco', cta:'Começar com 100 USDC',
+      alloc:[{n:'Reservas estáveis em USDC',p:50,c:'#0E7A4A'},{n:'Estratégias de rendimento',p:40,c:'#A07C2C'},{n:'Reserva de caixa',p:10,c:'#B0563A'}]
+    },
+    fast:{
+      name:'Crescer Mais Rápido', tagline:'Mais crescimento, mais sobe-e-desce',
+      desc:'Busca o maior crescimento no longo prazo. Espere subidas e descidas maiores — melhor para dinheiro que você não vai precisar tão cedo.',
+      apy:'20–45%', min:'400 USDC', move:'Bastante', cta:'Começar com 400 USDC',
+      alloc:[{n:'Reservas estáveis em USDC',p:20,c:'#0E7A4A'},{n:'Estratégias de rendimento',p:70,c:'#A07C2C'},{n:'Reserva de caixa',p:10,c:'#B0563A'}]
+    }
+  };
+  var modal=document.getElementById('planModal'), backdrop=document.getElementById('modalBackdrop');
+  function openPlan(id){
+    var p=PLANS[id]; if(!p) return;
+    document.getElementById('sheetTitle').textContent=p.name;
+    document.getElementById('sheetTagline').textContent=p.tagline;
+    document.getElementById('sheetDesc').textContent=p.desc;
+    document.getElementById('sheetApy').textContent=p.apy;
+    document.getElementById('sheetMin').textContent=p.min;
+    document.getElementById('sheetMove').textContent=p.move;
+    document.getElementById('sheetCta').textContent=p.cta;
+    var bar=document.getElementById('allocBar'), leg=document.getElementById('allocLeg');
+    bar.innerHTML=''; leg.innerHTML='';
+    p.alloc.forEach(function(a){
+      var seg=document.createElement('i');
+      seg.style.width=a.p+'%'; seg.style.background=a.c; bar.appendChild(seg);
+      var li=document.createElement('div'); li.className='li';
+      var dot=document.createElement('i'); dot.style.background=a.c;
+      var nm=document.createElement('span'); nm.textContent=a.n;
+      var pv=document.createElement('b'); pv.textContent=a.p+'%';
+      li.appendChild(dot); li.appendChild(nm); li.appendChild(pv); leg.appendChild(li);
+    });
+    modal.classList.add('open'); backdrop.classList.add('open');
+  }
+  function closePlan(){modal.classList.remove('open');backdrop.classList.remove('open');}
+  document.querySelectorAll('[data-open-plan]').forEach(function(b){
+    b.addEventListener('click',function(){openPlan(b.dataset.openPlan);});
+  });
+  backdrop.addEventListener('click',closePlan);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closePlan();});
+  document.getElementById('sheetCta').addEventListener('click',function(){
+    closePlan(); showToast('Boa escolha! 🎉 (isso é um protótipo)');
+  });
+
+  /* ---------- simulador ---------- */
+  var simRange=document.getElementById('simRange');
+  var simAmount=document.getElementById('simAmount');
+  var simResult=document.getElementById('simResult');
+  var months=12;
+  function project(P,rate,m){return P*Math.pow(1+rate/100,m/12);}
+  function renderSim(){
+    var P=Number(simRange.value);
+    simAmount.textContent=nf0.format(P);
+    simResult.textContent=nf0.format(Math.round(project(P,9,months)))+' e '+nf0.format(Math.round(project(P,16,months)))+' USDC';
+  }
+  simRange.addEventListener('input',renderSim);
+  document.querySelectorAll('#simPeriods .chip').forEach(function(ch){
+    ch.addEventListener('click',function(){
+      document.querySelectorAll('#simPeriods .chip').forEach(function(c){c.classList.remove('on');});
+      ch.classList.add('on'); months=Number(ch.dataset.months); renderSim();
+    });
+  });
+  renderSim();
+
+  /* ---------- assistente ---------- */
+  var ANSWERS={
+    'O que é USDC?':'USDC é uma moeda digital que vale sempre 1 dólar americano. É como ter dólares no bolso, só que no celular — e aqui eles ainda rendem todo dia 🙂',
+    'Quanto rendeu este mês?':'Este mês seu dinheiro rendeu 6,41 USDC até agora 📈 — somando os potes, a Caixinha e o cashback do cartão. Quer ver o detalhe de cada um?',
+    'Meu dinheiro está seguro?':'Sim! Seu saldo fica em USDC, que vale sempre 1 dólar, e a maior parte fica em reservas estáveis. Você resgata quando quiser, sem multa. Nós cuidamos da parte complicada 🙂',
+    'Posso resgatar quando quiser?':'Pode! É só tocar em "Resgatar" na tela de Início. O USDC vira Pix na sua conta em segundos, sem multa e sem pegadinha.'
+  };
+  var msgs=document.getElementById('msgs');
+  var suggestions=document.getElementById('suggestions');
+  function addMsg(text,who){
+    var d=document.createElement('div'); d.className='msg '+who; d.textContent=text;
+    msgs.appendChild(d); return d;
+  }
+  function botReply(text){
+    var t=document.createElement('div'); t.className='msg bot typing';
+    t.innerHTML='<i></i><i></i><i></i>';
+    msgs.appendChild(t);
+    setTimeout(function(){ t.remove(); addMsg(text,'bot'); },900);
+  }
+  function ask(q){
+    addMsg(q,'user');
+    botReply(ANSWERS[q] || 'Boa pergunta! No app de verdade eu respondo qualquer coisa na hora. Aqui na demo, experimente os botões de sugestão 🙂');
+  }
+  suggestions.addEventListener('click',function(e){
+    var b=e.target.closest('[data-q]'); if(!b) return;
+    suggestions.remove(); ask(b.dataset.q);
+  });
+  document.getElementById('chatForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var inp=document.getElementById('chatInput');
+    var q=inp.value.trim(); if(!q) return;
+    inp.value=''; ask(q);
+  });
+})();
+</script>
