@@ -10,12 +10,38 @@
   :root[data-theme="dark"]{--pg-bg:#0B0F0D;--pg-ink:#EDF1EE;--pg-ink-2:#ADB8B0;--pg-ink-3:#77837B;--pg-border:#242D27;--pg-green:#2FB673}
   :root[data-theme="light"]{--pg-bg:#EFEEE9;--pg-ink:#131A16;--pg-ink-2:#4C564F;--pg-ink-3:#7A847D;--pg-border:#DDDCD4;--pg-green:#0E7A4A}
 
-  /* ============ TOKENS — o app (tema fixo) ============ */
+  /* ============ TOKENS — o app (tema claro + escuro via toggle) ============ */
   :root{
     --bg:#F8F8F5; --card:#FFFFFF; --ink:#121814; --ink-2:#525C55; --ink-3:#8A948C; --line:#E9E9E2;
     --green:#0E7A4A; --green-deep:#0A5C38; --green-bright:#16A45E; --mint:#E7F2EB;
     --gold:#A07C2C; --gold-soft:#F5EEDC; --rust:#B0563A; --rust-soft:#F7E8E2; --red:#C03A2B;
+    --gold-ink:#7A5D1E; --rust-ink:#8A4128;
+    --ch-line:#0E7A4A; --ch-area:rgba(14,122,74,.10); --ch-dot:#0A5C38; --ch-grid:#EFEFE8;
   }
+  /* tema escuro — estilo Revolut: preto profundo, cartões grafite, verde vivo */
+  .screen.dark{
+    --bg:#0C0F0D; --card:#161A17; --ink:#EDF1EE; --ink-2:#A9B4AC; --ink-3:#76817A; --line:#242B26;
+    --green:#17915A; --green-deep:#9FE6BF; --green-bright:#3DC97F; --mint:#143024;
+    --gold:#C9A356; --gold-soft:#2A2314; --rust:#C96A48; --rust-soft:#2E1B14; --red:#E06A57;
+    --gold-ink:#D9BC7A; --rust-ink:#E09A82;
+    --ch-line:#2FB673; --ch-area:rgba(47,182,115,.12); --ch-dot:#8FE0B4; --ch-grid:#232B26;
+  }
+  .dark .caixinha{background:linear-gradient(135deg,#241E10 0%,#1B170C 100%);border-color:#3A311C}
+  .dark .caixinha .t,.dark .caixinha .live-val{color:#E8D9AC}
+  .dark .caixinha .s{color:#C9B87A}
+  .dark .caixinha .pig{background:#141109;border-color:#3A311C}
+  .dark .live-chip{background:#143024;color:#9FE6BF}
+  .dark .cashback{background:#241E10;border-color:#3A311C}
+  .dark .cashback b{color:#E8D9AC}
+  .dark .cashback span{color:#C9B87A}
+  .dark .cashback .coin{background:#141109;border-color:#3A311C;color:#D9BC7A}
+  .c-area{fill:var(--ch-area)} .c-line{stroke:var(--ch-line)} .c-dot{fill:var(--ch-dot)}
+  .c-vline{stroke:var(--ch-line)} .c-grid{stroke:var(--ch-grid)}
+  .icon-btn{width:34px;height:34px;border-radius:999px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2)}
+  .icon-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .icon-btn .ic-sun{display:none}
+  .dark .icon-btn .ic-sun{display:block}
+  .dark .icon-btn .ic-moon{display:none}
 
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -79,7 +105,7 @@
   .hello{font-size:19px;font-weight:700;letter-spacing:-0.01em}
   .hello small{display:block;font-size:12px;font-weight:500;color:var(--ink-3)}
   .h-right{display:flex;align-items:center;gap:8px}
-  .streak-chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:#7A5D1E;background:var(--gold-soft);border-radius:999px;padding:5px 10px}
+  .streak-chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:var(--gold-ink);background:var(--gold-soft);border-radius:999px;padding:5px 10px}
   .avatar{width:38px;height:38px;border-radius:999px;background:var(--gold-soft);color:var(--gold);display:grid;place-items:center;font-weight:800;font-size:14px;border:1.5px solid #E8DDBE}
 
   .page-t{font-size:20px;font-weight:800;letter-spacing:-0.01em;margin:6px 0 4px}
@@ -331,6 +357,25 @@
   .a-powered{font-size:10.5px;color:var(--ink-3);margin:8px 0 0}
   .a-powered b{color:var(--ink-2)}
   .a-big{font-size:46px;line-height:1;margin-top:20px}
+  .a-theme{position:absolute;top:14px;right:16px;z-index:6}
+  /* PIN */
+  .pin-lock{width:48px;height:48px;border-radius:999px;background:var(--mint);color:var(--green);display:grid;place-items:center;margin:14px auto 0}
+  .pin-lock svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .pin-dots{display:flex;gap:15px;justify-content:center;margin:4px 0 0}
+  .pin-dots i{width:14px;height:14px;border-radius:999px;border:2px solid var(--ink-3);transition:background .12s ease, border-color .12s ease, transform .12s ease}
+  .pin-dots i.on{background:var(--green);border-color:var(--green);transform:scale(1.05)}
+  .pin-dots.shake{animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+  @media (prefers-reduced-motion: reduce){.pin-dots.shake{animation:none}}
+  .pin-err{font-size:12px;font-weight:700;color:var(--red);margin:2px 0 0;min-height:15px}
+  .pinpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:250px;margin:4px auto 0}
+  .pinpad button{
+    height:54px;border-radius:15px;background:var(--card);border:1px solid var(--line);
+    font-size:21px;font-weight:700;color:var(--ink);transition:transform .1s ease, background .1s ease;
+  }
+  .pinpad button:active{transform:scale(.94);background:var(--mint)}
+  .pinpad .pin-del{background:transparent;border:none;font-size:19px;color:var(--ink-2)}
+  .pinpad .pin-del:active{background:transparent}
 
   .toast{
     position:absolute;left:50%;bottom:104px;transform:translate(-50%,16px);z-index:90;
@@ -354,6 +399,10 @@
 
       <!-- ===== FUNIL: LOGIN / CADASTRO / PERFIL ===== -->
       <div class="auth" id="auth">
+        <button class="icon-btn a-theme" id="themeBtnAuth" aria-label="Alternar tela clara e escura" title="Tela clara / escura">
+          <svg class="ic-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <svg class="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+        </button>
         <!-- Boas-vindas -->
         <section class="ascreen active" id="a-welcome">
           <div class="a-logo">DefiMind<i>.</i></div>
@@ -406,6 +455,25 @@
           </form>
         </section>
 
+        <!-- PIN de segurança -->
+        <section class="ascreen" id="a-pin">
+          <button class="a-back" id="pinBack" aria-label="Voltar">←</button>
+          <div class="pin-lock" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2.4"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          </div>
+          <h2 id="pinTitle">Crie seu PIN</h2>
+          <p class="a-sub" id="pinSub">4 números que você vai usar para entrar e confirmar pagamentos.</p>
+          <div class="pin-dots" id="pinDots"><i></i><i></i><i></i><i></i></div>
+          <p class="pin-err" id="pinErr">&nbsp;</p>
+          <div class="pinpad" id="pinpad">
+            <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+            <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+            <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+            <span></span><button data-k="0">0</button>
+            <button data-k="del" class="pin-del" aria-label="Apagar">⌫</button>
+          </div>
+        </section>
+
         <!-- Perfil de investidor -->
         <section class="ascreen" id="a-profile">
           <div class="a-progress"><i id="aProgFill" style="width:33%"></i></div>
@@ -440,7 +508,14 @@
         <section class="view active" id="view-home" aria-label="Início">
           <div class="app-h">
             <div class="hello"><small>Boa tarde 👋</small>Oi, <span id="helloName">João</span></div>
-            <div class="h-right"><span class="streak-chip">🔥 12</span><button class="avatar" id="avatarBtn" title="Sair da conta (demo)">J</button></div>
+            <div class="h-right">
+              <button class="icon-btn" id="themeBtn" aria-label="Alternar tela clara e escura" title="Tela clara / escura">
+                <svg class="ic-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                <svg class="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+              </button>
+              <span class="streak-chip">🔥 12</span>
+              <button class="avatar" id="avatarBtn" title="Sair da conta (demo)">J</button>
+            </div>
           </div>
 
           <div class="balance-card">
@@ -634,7 +709,7 @@
               <span class="top">
                 <span class="ic" style="background:var(--gold-soft);color:var(--gold)">C</span>
                 <span><span class="nm">Crescer com Calma</span><br><span class="tg">Crescimento equilibrado</span></span>
-                <span class="badge" style="background:var(--gold-soft);color:#7A5D1E">Mais escolhido</span>
+                <span class="badge" style="background:var(--gold-soft);color:var(--gold-ink)">Mais escolhido</span>
               </span>
               <span class="row">
                 <span class="apy"><b>9–16%</b><span>ao ano, em dólar</span></span>
@@ -647,7 +722,7 @@
               <span class="top">
                 <span class="ic" style="background:var(--rust-soft);color:var(--rust)">R</span>
                 <span><span class="nm">Crescer Mais Rápido</span><br><span class="tg">Mais sobe-e-desce</span></span>
-                <span class="badge" style="background:var(--rust-soft);color:#8A4128">Para experientes</span>
+                <span class="badge" style="background:var(--rust-soft);color:var(--rust-ink)">Para experientes</span>
               </span>
               <span class="row">
                 <span class="apy"><b>20–45%</b><span>ao ano, em dólar</span></span>
@@ -882,32 +957,39 @@
     var line=pts.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ');
     var area=line+' L'+pts[pts.length-1][0].toFixed(1)+','+H+' L'+pts[0][0].toFixed(1)+','+H+' Z';
     var ns='http://www.w3.org/2000/svg';
+    var themed=opts.themed;
     if(opts.grid){
       for(var g=1;g<=3;g++){
         var gl=document.createElementNS(ns,'line');
         var gy=pad+g*(H-2*pad)/4;
         gl.setAttribute('x1',pad);gl.setAttribute('x2',W-pad);gl.setAttribute('y1',gy);gl.setAttribute('y2',gy);
-        gl.setAttribute('stroke',opts.gridColor);gl.setAttribute('stroke-width','1');
+        if(themed){gl.setAttribute('class','c-grid');} else {gl.setAttribute('stroke',opts.gridColor);}
+        gl.setAttribute('stroke-width','1');
         svg.appendChild(gl);
       }
     }
     var a=document.createElementNS(ns,'path');
-    a.setAttribute('d',area); a.setAttribute('fill',opts.fill);
+    a.setAttribute('d',area);
+    if(themed){a.setAttribute('class','c-area');} else {a.setAttribute('fill',opts.fill);}
     svg.appendChild(a);
     var l=document.createElementNS(ns,'path');
     l.setAttribute('d',line); l.setAttribute('fill','none');
-    l.setAttribute('stroke',opts.stroke); l.setAttribute('stroke-width',opts.width||2);
+    if(themed){l.setAttribute('class','c-line');} else {l.setAttribute('stroke',opts.stroke);}
+    l.setAttribute('stroke-width',opts.width||2);
     l.setAttribute('stroke-linecap','round'); l.setAttribute('stroke-linejoin','round');
     svg.appendChild(l);
     var end=document.createElementNS(ns,'circle');
     end.setAttribute('cx',pts[pts.length-1][0]); end.setAttribute('cy',pts[pts.length-1][1]);
-    end.setAttribute('r',3.4); end.setAttribute('fill',opts.dot);
+    end.setAttribute('r',3.4);
+    if(themed){end.setAttribute('class','c-dot');} else {end.setAttribute('fill',opts.dot);}
     svg.appendChild(end);
     var cursor=document.createElementNS(ns,'circle');
-    cursor.setAttribute('r',4); cursor.setAttribute('fill',opts.dot); cursor.setAttribute('opacity','0');
+    cursor.setAttribute('r',4); cursor.setAttribute('opacity','0');
+    if(themed){cursor.setAttribute('class','c-dot');} else {cursor.setAttribute('fill',opts.dot);}
     svg.appendChild(cursor);
     var vline=document.createElementNS(ns,'line');
-    vline.setAttribute('stroke',opts.stroke); vline.setAttribute('stroke-width','1');
+    if(themed){vline.setAttribute('class','c-vline');} else {vline.setAttribute('stroke',opts.stroke);}
+    vline.setAttribute('stroke-width','1');
     vline.setAttribute('stroke-dasharray','3 3'); vline.setAttribute('opacity','0');
     vline.setAttribute('y1',pad); vline.setAttribute('y2',H-pad);
     svg.appendChild(vline);
@@ -943,7 +1025,7 @@
   var evoLabels=['fev','fev','mar','mar','abr','abr','mai','mai','jun','jun','jul','jul'];
   var evoSvg=document.getElementById('evoChart');
   var evoTip=document.getElementById('evoTip');
-  var evoBuilt=buildLine(evoSvg,evoData,{fill:'rgba(14,122,74,.10)',stroke:'#0E7A4A',dot:'#0A5C38',pad:8,width:2.2,grid:true,gridColor:'#EFEFE8',top:12});
+  var evoBuilt=buildLine(evoSvg,evoData,{themed:true,pad:8,width:2.2,grid:true,top:12});
   evoSvg.addEventListener('pointermove',function(ev){
     var idx=nearestIdx(evoBuilt,evoSvg,ev);
     var p=evoBuilt.pts[idx];
@@ -1121,8 +1203,7 @@
     var pw=document.getElementById('loginPass').value;
     if(!em || !pw){ showToast('Preencha e-mail e senha para entrar 🙂'); return; }
     userName='João';
-    finishAuth();
-    showToast('Bem-vindo de volta! 👋');
+    openPin('login');
   });
 
   document.getElementById('signupForm').addEventListener('submit',function(e){
@@ -1135,8 +1216,55 @@
     if(pw.length<8){ showToast('A senha precisa de pelo menos 8 caracteres 🔒'); return; }
     if(!document.getElementById('suTerms').checked){ showToast('Falta aceitar os termos para continuar'); return; }
     userName=firstName(nm);
-    startProfile();
-    aGoto('profile');
+    openPin('create');
+  });
+
+  /* ---- PIN de segurança (criar após cadastro, digitar após login) ---- */
+  var pinMode='create', pinBuffer='', pinFirst='';
+  var pinDots=document.getElementById('pinDots');
+  var pinTitle=document.getElementById('pinTitle');
+  var pinSub=document.getElementById('pinSub');
+  var pinErr=document.getElementById('pinErr');
+  var PIN_TEXT={
+    create:{t:'Crie seu PIN', s:'4 números que você vai usar para entrar e confirmar pagamentos.', back:'signup'},
+    confirm:{t:'Confirme seu PIN', s:'Digite os mesmos 4 números de novo.', back:'create'},
+    login:{t:'Digite seu PIN', s:'Use os 4 números da sua conta para entrar.', back:'login'}
+  };
+  function drawPin(){
+    var dots=pinDots.querySelectorAll('i');
+    dots.forEach(function(d,i){ d.classList.toggle('on', i<pinBuffer.length); });
+  }
+  function openPin(mode){
+    pinMode=mode; pinBuffer=''; if(mode!=='confirm') pinFirst='';
+    pinTitle.textContent=PIN_TEXT[mode].t;
+    pinSub.textContent=PIN_TEXT[mode].s;
+    pinErr.innerHTML='&nbsp;';
+    drawPin(); aGoto('pin');
+  }
+  function pinShake(msg){
+    pinErr.textContent=msg;
+    pinDots.classList.remove('shake'); void pinDots.offsetWidth; pinDots.classList.add('shake');
+    setTimeout(function(){ pinBuffer=''; drawPin(); },450);
+  }
+  function pinComplete(){
+    if(pinMode==='create'){
+      pinFirst=pinBuffer;
+      setTimeout(function(){ openPin('confirm'); },140);
+    } else if(pinMode==='confirm'){
+      if(pinBuffer===pinFirst){ startProfile(); aGoto('profile'); }
+      else { pinShake('Os PINs não bateram. Tente de novo.'); setTimeout(function(){ openPin('create'); },700); }
+    } else { finishAuth(); showToast('Bem-vindo de volta! 👋'); }
+  }
+  document.getElementById('pinpad').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    var k=b.dataset.k;
+    if(k==='del'){ pinBuffer=pinBuffer.slice(0,-1); pinErr.innerHTML='&nbsp;'; drawPin(); return; }
+    if(pinBuffer.length>=4) return;
+    pinBuffer+=k; drawPin();
+    if(pinBuffer.length===4){ setTimeout(pinComplete,120); }
+  });
+  document.getElementById('pinBack').addEventListener('click',function(){
+    aGoto(PIN_TEXT[pinMode].back);
   });
 
   var QUESTIONS=[
@@ -1207,6 +1335,21 @@
     setTimeout(function(){auth.classList.remove('hide');},30);
     aGoto('welcome');
     showToast('Você saiu da conta (demo) 👋');
+  });
+
+  /* ==================== TELA CLARA / ESCURA ==================== */
+  var appEl=document.querySelector('.screen');
+  var isDark=false;
+  try{ isDark = localStorage.getItem('dm-theme')==='dark'; }catch(e){}
+  function applyTheme(dark){
+    isDark=dark;
+    appEl.classList.toggle('dark',dark);
+    try{ localStorage.setItem('dm-theme', dark?'dark':'light'); }catch(e){}
+  }
+  applyTheme(isDark);
+  ['themeBtn','themeBtnAuth'].forEach(function(id){
+    var b=document.getElementById(id);
+    if(b) b.addEventListener('click',function(){ applyTheme(!isDark); });
   });
 })();
 </script>
