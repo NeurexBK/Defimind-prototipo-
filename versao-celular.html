@@ -298,6 +298,23 @@
   .cta{display:block;width:100%;background:var(--green);color:#fff;font-size:14.5px;font-weight:800;border-radius:15px;padding:14px;text-align:center;transition:transform .12s ease;margin-top:12px}
   .cta:active{transform:scale(.98)}
   .cta-note{text-align:center;font-size:11px;color:var(--ink-3);margin-top:7px}
+  /* escolher quanto investir */
+  .inv-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:7px}
+  .inv-bal{font-size:11px;color:var(--ink-3);white-space:nowrap}
+  .inv-bal b{color:var(--ink-2);font-weight:700;font-variant-numeric:tabular-nums}
+  .inv-input-row{display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--line);border-radius:13px;padding:11px 14px;transition:border-color .15s ease}
+  .inv-input-row.over{border-color:var(--red)}
+  .inv-input-row input{flex:1;border:none;background:transparent;font-size:22px;font-weight:800;color:var(--ink);font-family:inherit;font-variant-numeric:tabular-nums;width:100%;padding:0;letter-spacing:-0.01em}
+  .inv-input-row input:focus{outline:none}
+  .inv-input-row .inv-cur{font-size:13px;font-weight:700;color:var(--ink-3)}
+  .inv-chips{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+  .inv-chips button{font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink-2);transition:transform .1s ease}
+  .inv-chips button:active{transform:scale(.95)}
+  .inv-chips button.on{background:var(--green);border-color:var(--green);color:#fff}
+  .inv-hint{font-size:11.5px;font-weight:600;margin:7px 0 2px;min-height:15px}
+  .inv-hint.bad{color:var(--red)}
+  .inv-hint.ok{color:var(--green-bright)}
+  .cta.off{opacity:.45;pointer-events:none}
 
   /* --- funil: login / cadastro / perfil / criação da conta --- */
   .auth{
@@ -857,10 +874,25 @@
           <div class="fact"><div class="l">Sobe e desce?</div><div class="v" id="sheetMove" style="font-size:12.5px">—</div></div>
           <div class="fact"><div class="l">Resgate</div><div class="v" style="font-size:12.5px">Quando quiser</div></div>
         </div>
+        <div class="inv-head">
+          <span class="sec-t" style="margin:0">Quanto investir?</span>
+          <span class="inv-bal">Você tem <b id="invBal">2.415,80 USDC</b></span>
+        </div>
+        <div class="inv-input-row" id="invRow">
+          <input type="text" inputmode="numeric" id="invInput" value="20" aria-label="Valor a investir em USDC">
+          <span class="inv-cur">USDC</span>
+        </div>
+        <div class="inv-chips" id="invChips">
+          <button type="button" data-amt="min">Mínimo</button>
+          <button type="button" data-amt="100">100</button>
+          <button type="button" data-amt="500">500</button>
+          <button type="button" data-amt="max">Tudo</button>
+        </div>
+        <p class="inv-hint" id="invHint">&nbsp;</p>
         <div class="sec-t" style="margin-bottom:7px">O que tem dentro</div>
         <div class="alloc-bar" id="allocBar" aria-hidden="true"></div>
         <div class="alloc-leg" id="allocLeg"></div>
-        <button class="cta" id="sheetCta">Começar com 20 USDC</button>
+        <button class="cta" id="sheetCta">Investir 20 USDC</button>
         <div class="cta-note">Você pode tirar o dinheiro a qualquer momento, sem multa.</div>
       </div>
 
@@ -1070,32 +1102,82 @@
     safe:{
       name:'Guardar com Segurança', tagline:'Estável e protegido',
       desc:'O jeito mais simples de começar. Seu USDC fica em reservas estáveis, rendendo um pouco todo ano — quase sem sobe-e-desce.',
-      apy:'4–7%', min:'20 USDC', move:'Quase nada', cta:'Começar com 20 USDC',
+      apy:'4–7%', min:'20 USDC', minAmt:20, move:'Quase nada',
       alloc:[{n:'Reservas estáveis em USDC',p:80,c:'#0E7A4A'},{n:'Estratégias de rendimento',p:15,c:'#A07C2C'},{n:'Reserva de caixa',p:5,c:'#B0563A'}]
     },
     steady:{
       name:'Crescer com Calma', tagline:'Crescimento equilibrado',
       desc:'Uma mistura equilibrada, feita para crescer com o tempo balançando só um pouco no caminho. A escolha do meio.',
-      apy:'9–16%', min:'100 USDC', move:'Um pouco', cta:'Começar com 100 USDC',
+      apy:'9–16%', min:'100 USDC', minAmt:100, move:'Um pouco',
       alloc:[{n:'Reservas estáveis em USDC',p:50,c:'#0E7A4A'},{n:'Estratégias de rendimento',p:40,c:'#A07C2C'},{n:'Reserva de caixa',p:10,c:'#B0563A'}]
     },
     fast:{
       name:'Crescer Mais Rápido', tagline:'Mais crescimento, mais sobe-e-desce',
       desc:'Busca o maior crescimento no longo prazo. Espere subidas e descidas maiores — melhor para dinheiro que você não vai precisar tão cedo.',
-      apy:'20–45%', min:'400 USDC', move:'Bastante', cta:'Começar com 400 USDC',
+      apy:'20–45%', min:'400 USDC', minAmt:400, move:'Bastante',
       alloc:[{n:'Reservas estáveis em USDC',p:20,c:'#0E7A4A'},{n:'Estratégias de rendimento',p:70,c:'#A07C2C'},{n:'Reserva de caixa',p:10,c:'#B0563A'}]
     }
   };
   var sheet=document.getElementById('planSheet'), backdrop=document.getElementById('sheetBackdrop');
+  var BALANCE=2415.80;                 /* saldo disponível em USDC (livre para investir) */
+  var invInput=document.getElementById('invInput');
+  var invRow=document.getElementById('invRow');
+  var invHint=document.getElementById('invHint');
+  var invChips=document.getElementById('invChips');
+  var sheetCta=document.getElementById('sheetCta');
+  var curPlan=null;
+
+  function parseAmt(s){
+    s=(s||'').replace(/[^\d.,]/g,'').replace(/\./g,'').replace(',','.');
+    var n=parseFloat(s); return isNaN(n)?0:n;
+  }
+  function fmtAmt(n){ return (Math.round(n*100)%100===0) ? nf0.format(n) : nf2.format(n); }
+  function validateAmt(){
+    var n=parseAmt(invInput.value);
+    var min=curPlan?curPlan.minAmt:0;
+    var ok=false, msg='';
+    if(n<=0){ msg=''; }
+    else if(n>BALANCE){ msg='Você só tem '+nf2.format(BALANCE)+' USDC disponível.'; }
+    else if(n<min){ msg='O mínimo neste pote é '+nf0.format(min)+' USDC.'; }
+    else { ok=true; msg='Vai render em USDC a partir de hoje ✓'; }
+    var over=n>BALANCE;
+    invRow.classList.toggle('over', over);
+    var cs=getComputedStyle(document.querySelector('.screen'));
+    invRow.style.borderColor = (over ? cs.getPropertyValue('--red') : cs.getPropertyValue('--line')).trim();
+    invHint.className='inv-hint'+(n<=0?'':(ok?' ok':' bad'));
+    invHint.innerHTML = msg || '&nbsp;';
+    sheetCta.classList.toggle('off', !ok);
+    sheetCta.textContent = ok ? ('Investir '+fmtAmt(n)+' USDC') : 'Investir';
+    return ok?n:0;
+  }
+  invInput.addEventListener('input',function(){
+    invChips.querySelectorAll('button').forEach(function(c){c.classList.remove('on');});
+    validateAmt();
+  });
+  invChips.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    invChips.querySelectorAll('button').forEach(function(c){c.classList.remove('on');});
+    b.classList.add('on');
+    var v=b.dataset.amt;
+    if(v==='min'){ invInput.value=String(curPlan.minAmt); }
+    else if(v==='max'){ invInput.value=nf2.format(BALANCE); }
+    else { invInput.value=v; }
+    validateAmt();
+  });
+
   function openPlan(id){
     var p=PLANS[id]; if(!p) return;
+    curPlan=p;
     document.getElementById('sheetTitle').textContent=p.name;
     document.getElementById('sheetTagline').textContent=p.tagline;
     document.getElementById('sheetDesc').textContent=p.desc;
     document.getElementById('sheetApy').textContent=p.apy;
     document.getElementById('sheetMin').textContent=p.min;
     document.getElementById('sheetMove').textContent=p.move;
-    document.getElementById('sheetCta').textContent=p.cta;
+    document.getElementById('invBal').textContent=nf2.format(BALANCE)+' USDC';
+    invInput.value=String(p.minAmt);
+    invChips.querySelectorAll('button').forEach(function(c){c.classList.remove('on');});
+    validateAmt();
     var bar=document.getElementById('allocBar'), leg=document.getElementById('allocLeg');
     bar.innerHTML=''; leg.innerHTML='';
     p.alloc.forEach(function(a){
@@ -1115,8 +1197,11 @@
   });
   backdrop.addEventListener('click',closePlan);
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closePlan();});
-  document.getElementById('sheetCta').addEventListener('click',function(){
-    closePlan(); showToast('Boa escolha! 🎉 (isso é um protótipo)');
+  sheetCta.addEventListener('click',function(){
+    var n=validateAmt();
+    if(!n){ return; }
+    closePlan();
+    showToast('Aplicado '+fmtAmt(n)+' USDC em '+curPlan.name+'! 🎉 (protótipo)');
   });
 
   /* ---------- simulador ---------- */
